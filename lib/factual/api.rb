@@ -9,11 +9,12 @@ class Factual
     DRIVER_VERSION_TAG = "factual-ruby-driver-v" + VERSION
     PARAM_ALIASES = { :search => :q, :sort_asc => :sort }
 
-    def initialize(access_token, debug_mode = false, host = nil, timeout = nil)
+    def initialize(access_token, debug_mode = false, host = nil, timeout = nil, cache = nil)
       @access_token = access_token
       @debug_mode = debug_mode
       @timeout = timeout
       @host = host || API_V3_HOST
+      @cache = cache
     end
 
     def get(query, other_params = {})
@@ -106,7 +107,13 @@ class Factual
       headers = { "X-Factual-Lib" => DRIVER_VERSION_TAG }
 
       res = if (method == :get)
-              Timeout::timeout(@timeout){ @access_token.get(url, headers) }
+              Timeout::timeout(@timeout) do
+                if @cache
+                  @cache.get(url) || @cache.set(url, @access_token.get(url, headers))
+                else
+                  @access_token.get(url, headers)
+                end
+              end
             elsif (method == :post)
               Timeout::timeout(@timeout){ @access_token.post(url, body, headers) }
             else

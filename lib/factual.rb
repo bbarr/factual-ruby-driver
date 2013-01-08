@@ -15,13 +15,14 @@ require 'factual/write/submit'
 require 'factual/write/clear'
 require 'factual/write/insert'
 require 'factual/multi'
+require 'factual/cache'
 
 class Factual
   def initialize(key, secret, options = {})
     debug_mode = options[:debug].nil? ? false : options[:debug]
     host = options[:host]
     timeout = options[:timeout]
-    @api = API.new(generate_token(key, secret), debug_mode, host, timeout)
+    @api = API.new(generate_token(key, secret), debug_mode, host, timeout, Factual::Cache.instance)
   end
 
   def table(table_id_or_alias)
