@@ -10,8 +10,8 @@ class Factual
         cache = self.new
         cache.instance_eval(&block) if block_given?
 
-        has_get = cache.instance_variable_defined?(:getter)
-        has_set = cache.instance_variable_defined?(:setter)
+        has_get = cache.instance_variable_defined?(:@getter)
+        has_set = cache.instance_variable_defined?(:@setter)
         unless has_get and has_set
           raise Error, "#{has_get ? 'get' : 'set'} is not defined for cache."
         end
