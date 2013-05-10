@@ -4,19 +4,36 @@ class Factual
 
       attr_reader :instance
 
-      def set &block
+      def config &block
+        raise Error, "Cache already configured" unless @instance.nil?
 
-        cache = Class.new
-        cache.class_eval(&block) if block_given?
+        cache = self.new
+        cache.instance_eval(&block) if block_given?
 
-        has_get = cache.method_defined?(:get)
-        has_set = cache.method_defined?(:set)
+        has_get = cache.instance_variable_defined?(:get)
+        has_set = cache.instance_variable_defined?(:set)
         unless has_get and has_set
-          raise NoMethodError, "#{has_get ? 'get' : 'set'} method is not defined for cache."
+          raise Error, "#{has_get ? 'get' : 'set'} is not defined for cache."
         end
 
-        @instance = cache.new
+        @instance = cache
       end
+    end
+
+    attr_accessor :getter, :setter
+
+    def get *args
+      @getter = &block and return if block_given?   
+      @getter.call(*args)
+    end
+
+    def set *args
+      @setter = &block and return if block_given?   
+      @setter.call(*args)
+    end
+
+    def max_age response
+      response['cache-control'].split('=')[1].to_i
     end
   end
 end
