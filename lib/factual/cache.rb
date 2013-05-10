@@ -23,12 +23,12 @@ class Factual
     attr_accessor :getter, :setter
 
     def get *args, &block
-      @getter = &block and return if block_given?   
+      @getter = block and return if block_given?   
       @getter.call(*args)
     end
 
     def set *args, &block
-      @setter = &block and return if block_given?   
+      @setter = block and return if block_given?   
       @setter.call(*args)
     end
 
